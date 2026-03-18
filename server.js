@@ -1,41 +1,34 @@
 const express = require("express");
 const { Pool } = require("pg");
+const cors = require("cors"); // Adăugăm asta pentru ca site-ul să poată citi datele
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-// Conectare la baza de date
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-// Creare tabel automat la pornire
-const initDb = async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS sensor_data (
-        id SERIAL PRIMARY KEY,
-        temperature FLOAT,
-        humidity FLOAT,
-        mq INT,
-        sound INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    console.log("Tabel pregatit!");
-  } catch (err) {
-    console.error(err);
-  }
-};
-initDb();
+// Creează tabelul dacă nu există
+pool.query(`
+  CREATE TABLE IF NOT EXISTS sensor_data (
+    id SERIAL PRIMARY KEY,
+    temperature FLOAT,
+    humidity FLOAT,
+    mq INT,
+    sound INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`).then(() => console.log("Tabelul este gata!"));
 
-// Pagina principala
+// RUTA 1: Pagina principală (Test)
 app.get("/", (req, res) => {
-  res.send("Serverul este activ si tabelul este gata!");
+  res.send("Sistemul de monitorizare este ONLINE!");
 });
 
-// RUTA PENTRU ESP32 (sa salveze date)
+// RUTA 2: ESP32 trimite date aici (Asta merge deja la tine!)
 app.post("/update-data", async (req, res) => {
   const { temperature, humidity, mq, sound } = req.body;
   try {
@@ -43,20 +36,26 @@ app.post("/update-data", async (req, res) => {
       "INSERT INTO sensor_data (temperature, humidity, mq, sound) VALUES ($1, $2, $3, $4)",
       [temperature, humidity, mq, sound]
     );
-    res.status(200).send("Date salvate!");
+    res.status(200).send("OK");
   } catch (err) {
+    console.error(err);
     res.status(500).send("Eroare la salvare");
   }
 });
 
-// RUTA PENTRU BROWSER (sa vezi datele) - ASTA LIPSREA!
+// RUTA 3: Site-ul cere datele aici (Asta îți lipsește!)
 app.get("/get-latest", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM sensor_data ORDER BY created_at DESC LIMIT 1");
-    res.json(result.rows[0] || { message: "Inca nu sunt date in baza de date." });
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.json({ message: "Nu sunt date încă." });
+    }
   } catch (err) {
-    res.status(500).json({ error: "Eroare la citire" });
+    res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3000, () => console.log("Server pornit pe portul 3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Serverul rulează pe portul ${PORT}`));
