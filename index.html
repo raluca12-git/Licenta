@@ -25,7 +25,7 @@
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 25%),
@@ -200,14 +200,14 @@
     <div class="topbar">
       <div class="hero">
         <div class="eyebrow">Smart Comfort Control</div>
-        <h1>Sistem de monitorizare și reglare ambientală (LIVE)</h1>
+        <h1>Monitorizare Ambientală (LIVE)</h1>
         <p>Date colectate în timp real de la senzorii DHT11, MQ135 și Senzor de Zgomot.</p>
       </div>
 
       <div class="live-box">
         <div class="live-row">
           <span class="dot"></span>
-          <span id="connectionStatus">Conectat la Server</span>
+          <span id="connectionStatus">Se conectează...</span>
         </div>
         <small id="lastUpdate">Ultima actualizare: --:--:--</small>
       </div>
@@ -276,30 +276,33 @@
     }
 
     function updateUI(data) {
-      // 1. Actualizare valori principale
+      // 1. Actualizare valori principale (Corectat noiseValue)
       document.getElementById('tempValue').textContent = `${data.temperature.toFixed(1)}°C`;
       document.getElementById('humValue').textContent = `${data.humidity}%`;
-      document.getElementById('noiseValue').textContent = `${data.mq} dB`; // Folosim noise daca e separat, sau mq ca test
+      document.getElementById('noiseValue').textContent = `${data.sound} dB`; 
       document.getElementById('mqValue').textContent = data.mq;
       document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
 
-      // 2. Logica ventilator (Exemplu: Peste 28 grade porneste)
+      // 2. Logica ventilator (Exemplu: Peste 28 grade sau aer poluat)
       const fanOn = data.temperature > 28 || data.mq > 350;
       const fanEl = document.getElementById('fanState');
       fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
       fanEl.className = 'system-state ' + (fanOn ? 'state-on' : 'state-off');
 
-      // 3. Logica Volum (Bazata pe zgomot - aici folosim valoarea 'sound' din JSON daca exista)
+      // 3. Logica Volum (Bazata pe zgomot real)
       let volume = 10;
-      if (data.sound > 30) volume = 20;
-      if (data.sound > 50) volume = 30;
+      if (data.sound > 400) volume = 18;
+      if (data.sound > 700) volume = 25;
       document.getElementById('musicVolume').textContent = volume;
 
       // 4. Comfort Tag
       const tag = document.getElementById('comfortTag');
-      if (data.temperature > 30) {
-        tag.textContent = "Căldură excesivă";
+      if (data.temperature > 30 || data.mq > 400) {
+        tag.textContent = "Calitate Scăzută";
         tag.className = "chip bad";
+      } else if (data.temperature > 27) {
+        tag.textContent = "Disconfort Termic";
+        tag.className = "chip mid";
       } else {
         tag.textContent = "Confort Optim";
         tag.className = "chip good";
@@ -314,7 +317,10 @@
         mq: data.mq
       };
 
-      historyData.unshift(historyEntry);
+      if (historyData.length === 0 || historyData[0].temp !== historyEntry.temp) {
+          historyData.unshift(historyEntry);
+      }
+      
       if (historyData.length > 8) historyData.pop();
 
       const tbody = document.querySelector('#historyTable tbody');
@@ -323,7 +329,7 @@
           <td>${r.time}</td>
           <td>${r.temp.toFixed(1)}°C</td>
           <td>${r.hum}%</td>
-          <td>${r.noise} dB</td>
+          <td>${r.noise}</td>
           <td>${r.mq}</td>
         </tr>
       `).join('');
@@ -336,15 +342,14 @@
         
         if (data && !data.message) {
           updateUI(data);
-          document.getElementById('connectionStatus').textContent = "Sistem activ - Date Reale";
+          document.getElementById('connectionStatus').textContent = "Sistem activ - Live";
         }
       } catch (err) {
         console.error("Eroare fetch:", err);
-        document.getElementById('connectionStatus').textContent = "Eroare conexiune server";
+        document.getElementById('connectionStatus').textContent = "Eroare conexiune";
       }
     }
 
-    // Pornim verificarea datelor la fiecare 3 secunde
     fetchData();
     setInterval(fetchData, 3000);
   </script>
