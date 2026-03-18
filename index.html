@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Comfort Control</title>
+  <title>Smart Comfort Control - Live</title>
   <style>
     :root {
       --bg-1: #0b1020;
@@ -101,12 +101,13 @@
       border-radius: 50%;
       background: #22c55e;
       box-shadow: 0 0 12px rgba(34, 197, 94, 0.75);
+      animation: pulse 2s infinite;
     }
 
-    .live-box small {
-      display: block;
-      color: var(--muted);
-      line-height: 1.5;
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
     }
 
     .section-title {
@@ -128,19 +129,6 @@
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 90px;
-      height: 90px;
-      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
-      pointer-events: none;
     }
 
     .label {
@@ -155,12 +143,6 @@
       margin-bottom: 8px;
     }
 
-    .status {
-      font-size: 14px;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
     .panels {
       display: grid;
       grid-template-columns: 1.8fr 1fr;
@@ -172,26 +154,18 @@
       border: 1px solid var(--line);
       border-radius: 24px;
       padding: 20px;
-      box-shadow: var(--shadow);
     }
 
     .table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
     }
 
-    .table th,
-    .table td {
+    .table th, .table td {
       text-align: left;
       padding: 12px 8px;
       border-bottom: 1px solid var(--line);
       font-size: 14px;
-    }
-
-    .table th {
-      color: var(--muted);
-      font-weight: 600;
     }
 
     .system-state {
@@ -202,25 +176,6 @@
 
     .state-on { color: #86efac; }
     .state-off { color: #fca5a5; }
-
-    .metric-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .metric-item {
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .metric-item strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #e2e8f0;
-    }
 
     .chip {
       display: inline-block;
@@ -235,32 +190,8 @@
     .mid { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
     .bad { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
 
-    .footer-note {
-      margin-top: 20px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-      text-align: center;
-    }
-
     @media (max-width: 860px) {
-      .topbar,
-      .panels {
-        grid-template-columns: 1fr;
-        display: grid;
-      }
-
-      .topbar {
-        gap: 16px;
-      }
-
-      .live-box {
-        min-width: auto;
-      }
-
-      h1 {
-        font-size: 30px;
-      }
+      .topbar, .panels { grid-template-columns: 1fr; display: grid; }
     }
   </style>
 </head>
@@ -269,53 +200,48 @@
     <div class="topbar">
       <div class="hero">
         <div class="eyebrow">Smart Comfort Control</div>
-        <h1>Sistem de monitorizare și reglare a confortului ambiental</h1>
-        <p>
-          Platformă web pentru supravegherea parametrilor de mediu într-o zonă comercială,
-          cu accent pe temperatură, umiditate, calitatea aerului, nivel de zgomot,
-          starea ventilatorului și reglarea muzicii ambientale.
-        </p>
+        <h1>Sistem de monitorizare și reglare ambientală (LIVE)</h1>
+        <p>Date colectate în timp real de la senzorii DHT11, MQ135 și Senzor de Zgomot.</p>
       </div>
 
       <div class="live-box">
         <div class="live-row">
           <span class="dot"></span>
-          <span>Sistem activ</span>
+          <span id="connectionStatus">Conectat la Server</span>
         </div>
-        <small>Monitorizare în timp real a parametrilor esențiali pentru confort și control ambiental.</small>
+        <small id="lastUpdate">Ultima actualizare: --:--:--</small>
       </div>
     </div>
 
-    <div class="section-title">Parametri ambientali</div>
     <div class="grid">
       <div class="card">
         <div class="label">Temperatură</div>
-        <div class="value" id="tempValue">24.8°C</div>
-        <div class="status">Interval recomandat pentru confort: 21–26°C</div>
+        <div class="value" id="tempValue">--°C</div>
+        <div class="status">Optim: 21–26°C</div>
       </div>
 
       <div class="card">
         <div class="label">Umiditate</div>
-        <div class="value" id="humValue">47%</div>
-        <div class="status">Interval optim estimat: 40–60%</div>
+        <div class="value" id="humValue">--%</div>
+        <div class="status">Optim: 40–60%</div>
       </div>
 
       <div class="card">
         <div class="label">Nivel zgomot</div>
-        <div class="value" id="noiseValue">32 dB</div>
-        <div class="status">Parametru folosit pentru reglarea muzicii ambientale</div>
+        <div class="value" id="noiseValue">-- dB</div>
+        <div class="status">Reglează volumul muzicii</div>
       </div>
 
       <div class="card">
-        <div class="label">MQ135 / calitate aer</div>
-        <div class="value" id="mqValue">290</div>
-        <div class="status">Indice relativ pentru evaluarea aerului interior</div>
+        <div class="label">Calitate Aer (MQ135)</div>
+        <div class="value" id="mqValue">--</div>
+        <div class="status">Prag alertă: > 350</div>
       </div>
     </div>
 
     <div class="panels">
       <div class="panel">
-        <div class="section-title">Istoric scurt valori</div>
+        <div class="section-title">Istoric recent date</div>
         <table class="table" id="historyTable">
           <thead>
             <tr>
@@ -331,60 +257,68 @@
       </div>
 
       <div class="panel">
-        <div class="section-title">Stare sistem</div>
-        <div class="system-state state-off" id="fanState">Ventilator OFF</div>
-        <div class="status">Volum muzică ambientală: <strong id="musicVolume">10</strong>/30</div>
-        <div class="chip good" id="comfortTag">Confort bun</div>
-
-        <div class="metric-list">
-          <div class="metric-item">
-            <strong>Regulă ventilație</strong>
-            Ventilatorul se activează dacă temperatura, umiditatea sau indicele MQ135 depășesc pragurile definite.
-          </div>
-          <div class="metric-item">
-            <strong>Regulă volum muzică</strong>
-            Nivelul zgomotului influențează automat intensitatea muzicii ambientale.
-          </div>
-          <div class="metric-item">
-            <strong>Scop sistem</strong>
-            Menținerea unui nivel de confort adecvat într-un spațiu comercial cu grad variabil de ocupare.
-          </div>
-        </div>
+        <div class="section-title">Stare Sistem Actuatori</div>
+        <div class="system-state" id="fanState">Verificare...</div>
+        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
+        <div class="chip" id="comfortTag">Calculare...</div>
       </div>
-    </div>
-
-    <div class="footer-note">
-      Interfață de monitorizare pentru parametrii de mediu, calitatea aerului și comportamentul sistemului de reglare automată.
     </div>
   </div>
 
   <script>
-    const rows = [];
+    const historyData = [];
+    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
-    }
-
+    function pad(n) { return String(n).padStart(2, '0'); }
     function getNow() {
       const d = new Date();
       return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    function classifyComfort(temp, hum, mq) {
-      if (temp > 32 || mq > 350 || hum > 70) return 'Atenție';
-      if (temp > 28 || mq > 320 || hum > 60) return 'Mediu';
-      return 'Confort bun';
-    }
+    function updateUI(data) {
+      // 1. Actualizare valori principale
+      document.getElementById('tempValue').textContent = `${data.temperature.toFixed(1)}°C`;
+      document.getElementById('humValue').textContent = `${data.humidity}%`;
+      document.getElementById('noiseValue').textContent = `${data.mq} dB`; // Folosim noise daca e separat, sau mq ca test
+      document.getElementById('mqValue').textContent = data.mq;
+      document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
 
-    function updateTag(text) {
+      // 2. Logica ventilator (Exemplu: Peste 28 grade porneste)
+      const fanOn = data.temperature > 28 || data.mq > 350;
+      const fanEl = document.getElementById('fanState');
+      fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
+      fanEl.className = 'system-state ' + (fanOn ? 'state-on' : 'state-off');
+
+      // 3. Logica Volum (Bazata pe zgomot - aici folosim valoarea 'sound' din JSON daca exista)
+      let volume = 10;
+      if (data.sound > 30) volume = 20;
+      if (data.sound > 50) volume = 30;
+      document.getElementById('musicVolume').textContent = volume;
+
+      // 4. Comfort Tag
       const tag = document.getElementById('comfortTag');
-      tag.textContent = text;
-      tag.className = 'chip ' + (text === 'Confort bun' ? 'good' : text === 'Mediu' ? 'mid' : 'bad');
-    }
+      if (data.temperature > 30) {
+        tag.textContent = "Căldură excesivă";
+        tag.className = "chip bad";
+      } else {
+        tag.textContent = "Confort Optim";
+        tag.className = "chip good";
+      }
 
-    function renderHistory() {
+      // 5. Istoric (Tabel)
+      const historyEntry = {
+        time: getNow(),
+        temp: data.temperature,
+        hum: data.humidity,
+        noise: data.sound || 0,
+        mq: data.mq
+      };
+
+      historyData.unshift(historyEntry);
+      if (historyData.length > 8) historyData.pop();
+
       const tbody = document.querySelector('#historyTable tbody');
-      tbody.innerHTML = rows.map(r => `
+      tbody.innerHTML = historyData.map(r => `
         <tr>
           <td>${r.time}</td>
           <td>${r.temp.toFixed(1)}°C</td>
@@ -395,35 +329,24 @@
       `).join('');
     }
 
-    function simulate() {
-      const temp = 22 + Math.random() * 12;
-      const hum = Math.round(40 + Math.random() * 35);
-      const noise = Math.round(18 + Math.random() * 55);
-      const mq = Math.round(240 + Math.random() * 170);
-
-      let volume = 10;
-      if (noise >= 25 && noise < 45) volume = 15;
-      if (noise >= 45) volume = 22;
-
-      const fanOn = temp > 32 || hum > 70 || mq > 350;
-
-      document.getElementById('tempValue').textContent = `${temp.toFixed(1)}°C`;
-      document.getElementById('humValue').textContent = `${hum}%`;
-      document.getElementById('noiseValue').textContent = `${noise} dB`;
-      document.getElementById('mqValue').textContent = `${mq}`;
-      document.getElementById('musicVolume').textContent = volume;
-      document.getElementById('fanState').textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
-      document.getElementById('fanState').className = fanOn ? 'system-state state-on' : 'system-state state-off';
-
-      updateTag(classifyComfort(temp, hum, mq));
-
-      rows.unshift({ time: getNow(), temp, hum, noise, mq });
-      if (rows.length > 6) rows.pop();
-      renderHistory();
+    async function fetchData() {
+      try {
+        const response = await fetch(SERVER_URL);
+        const data = await response.json();
+        
+        if (data && !data.message) {
+          updateUI(data);
+          document.getElementById('connectionStatus').textContent = "Sistem activ - Date Reale";
+        }
+      } catch (err) {
+        console.error("Eroare fetch:", err);
+        document.getElementById('connectionStatus').textContent = "Eroare conexiune server";
+      }
     }
 
-    simulate();
-    setInterval(simulate, 4000);
+    // Pornim verificarea datelor la fiecare 3 secunde
+    fetchData();
+    setInterval(fetchData, 3000);
   </script>
 </body>
 </html>
