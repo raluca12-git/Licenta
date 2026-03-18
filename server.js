@@ -1,10 +1,15 @@
 const express = require("express");
 const { Pool } = require("pg");
-const cors = require("cors"); // Adăugăm asta pentru ca site-ul să poată citi datele
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+
+// Configurăm manual accesul (CORS) fără a avea nevoie de pachetul extern 'cors'
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -23,12 +28,10 @@ pool.query(`
   );
 `).then(() => console.log("Tabelul este gata!"));
 
-// RUTA 1: Pagina principală (Test)
 app.get("/", (req, res) => {
   res.send("Sistemul de monitorizare este ONLINE!");
 });
 
-// RUTA 2: ESP32 trimite date aici (Asta merge deja la tine!)
 app.post("/update-data", async (req, res) => {
   const { temperature, humidity, mq, sound } = req.body;
   try {
@@ -43,7 +46,6 @@ app.post("/update-data", async (req, res) => {
   }
 });
 
-// RUTA 3: Site-ul cere datele aici (Asta îți lipsește!)
 app.get("/get-latest", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM sensor_data ORDER BY created_at DESC LIMIT 1");
