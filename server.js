@@ -23,20 +23,21 @@ app.get("/", (req, res) => {
 // primește date de la ESP32 și le salvează în DB
 app.post("/update-data", async (req, res) => {
   try {
-    const { temperature, humidity, mq, sound } = req.body;
+    const { temperature, humidity, mq, sound, fan } = req.body;
 
     if (
       temperature === undefined ||
       humidity === undefined ||
       mq === undefined ||
-      sound === undefined
+      sound === undefined ||
+      fan === undefined
     ) {
       return res.status(400).json({ error: "Lipsesc date din request" });
     }
 
     await pool.query(
-      "INSERT INTO sensor_data (temperature, humidity, mq, sound) VALUES ($1, $2, $3, $4)",
-      [temperature, humidity, mq, sound]
+      "INSERT INTO sensor_data (temperature, humidity, mq, sound, fan) VALUES ($1, $2, $3, $4, $5)",
+      [temperature, humidity, mq, sound, fan]
     );
 
     res.status(200).json({ success: true, message: "Date salvate" });
