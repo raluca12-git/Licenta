@@ -6,26 +6,68 @@ const app = express();
 
 app.use(express.json());
 
-// conectare DB
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-// servește fișiere statice din folderul curent
 app.use(express.static(__dirname));
 
-// pagina principală
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// pagina senzori
 app.get("/sensors.html", (req, res) => {
   res.sendFile(path.join(__dirname, "sensors.html"));
 });
 
-// primește date de la ESP32 și le salvează în DB
+app.get("/control.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "control.html"));
+});
+
+// stocare simpla pentru control manual
+let controls = {
+  mode: "auto",
+  manualVolume: 10,
+  manualFan: 0
+};
+
+app.get("/get-controls", (req, res) => {
+  res.json(controls);
+});
+
+app.post("/set-controls", (req, res) => {
+  try {
+    const { mode, manualVolume, manualFan } = req.body;
+
+    if (!["auto", "manual"].includes(mode)) {
+      return res.status(400).json({ error: "Mod invalid" });
+    }
+
+    const volume = Number(manualVolume);
+    const fan = Number(manualFan);
+
+    if (isNaN(volume) || volume < 0 || volume > 30) {
+      return res.status(400).json({ error: "Volum invalid" });
+    }
+
+    if (![0, 1].includes(fan)) {
+      return res.status(400).json({ error: "Stare ventilator invalidă" });
+    }
+
+    controls = {
+      mode,
+      manualVolume: volume,
+      manualFan: fan
+    };
+
+    res.json({ success: true, controls });
+  } catch (error) {
+    console.error("Eroare la /set-controls:", error);
+    res.status(500).json({ error: "Eroare la salvarea comenzilor" });
+  }
+});
+
 app.post("/update-data", async (req, res) => {
   try {
     const { temperature, humidity, mq, sound, fan } = req.body;
@@ -52,7 +94,6 @@ app.post("/update-data", async (req, res) => {
   }
 });
 
-// trimite ultima înregistrare către site
 app.get("/get-latest", async (req, res) => {
   try {
     const result = await pool.query(
