@@ -20,6 +20,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// pagina senzori
+app.get("/sensors.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "sensors.html"));
+});
+
 // primește date de la ESP32 și le salvează în DB
 app.post("/update-data", async (req, res) => {
   try {
