@@ -201,7 +201,6 @@
       <div class="hero">
         <div class="eyebrow">Smart Comfort Control</div>
         <h1>Monitorizare Ambientală</h1>
-    
       </div>
 
       <div class="live-box">
@@ -229,7 +228,9 @@
       <div class="card">
         <div class="label">Nivel zgomot</div>
         <div class="value" id="noiseValue">-- dB</div>
-        <div class="status">Reglează volumul muzicii</div>
+        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
+
+
       </div>
 
       <div class="card">
@@ -237,11 +238,10 @@
         <div class="value" id="mqValue">--</div>
         <div class="status">Prag alertă: > 350</div>
       </div>
+
       <div class="card">
         <div class="section-title">Stare Sistem Actuatori</div>
         <div class="system-state" id="fanState">Verificare...</div>
-        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
-        <div class="chip" id="comfortTag">Calculare...</div>
       </div>
     </div>
 
@@ -262,6 +262,739 @@
           <tbody></tbody>
         </table>
       </div>
+
+    </div>
+  </div>
+
+  <script>
+    const historyData = [];
+    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function getNow() {
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function updateUI(data) {
+      document.getElementById('tempValue').textContent = `${Number(data.temperature).toFixed(1)}°C`;
+      document.getElementById('humValue').textContent = `${data.humidity}%`;
+      document.getElementById('noiseValue').textContent = `${data.sound} dB`;
+      document.getElementById('mqValue').textContent = data.mq;
+      document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
+
+      // Folosim direct starea reala a ventilatorului din baza de date
+      const fanOn = Number(data.fan) === 1;
+      const fanEl = document.getElementById('fanState');
+      fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
+      fanEl.className = 'system-state ' + (fanOn ? 'state-on' : 'state-off');
+
+      // Volum muzica, dupa zgomot
+      let volume = 8;
+      if (data.sound >= 20 && data.sound < 50) volume = 15;
+      if (data.sound >= 50) volume = 22;
+      document.getElementById('musicVolume').textContent = volume;
+
+      // Comfort tag
+      const tag = document.getElementById('comfortTag');
+      if (data.mq > 350 || data.humidity > 70 || Number(data.fan) === 1) {
+        tag.textContent = "Atenție sistem activ";
+        tag.className = "chip bad";
+      } else if (data.temperature > 27) {
+        tag.textContent = "Disconfort Termic";
+        tag.className = "chip mid";
+      } else {
+        tag.textContent = "Confort Optim";
+        tag.className = "chip good";
+      }
+
+      // Istoric
+      const historyEntry = {
+        time: getNow(),
+        temp: Number(data.temperature),
+        hum: data.humidity,
+        noise: data.sound || 0,
+        mq: data.mq,
+        fan: Number(data.fan) === 1 ? 'ON' : 'OFF'
+      };
+
+      if (
+        historyData.length === 0 ||
+        historyData[0].temp !== historyEntry.temp ||
+        historyData[0].hum !== historyEntry.hum ||
+        historyData[0].noise !== historyEntry.noise ||
+        historyData[0].mq !== historyEntry.mq ||
+        historyData[0].fan !== historyEntry.fan
+      ) {
+        historyData.unshift(historyEntry);
+      }
+
+      if (historyData.length > 8) historyData.pop();
+
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = historyData.map(r => `
+        <tr>
+          <td>${r.time}</td>
+          <td>${r.temp.toFixed(1)}°C</td>
+          <td>${r.hum}%</td>
+          <td>${r.noise}</td>
+          <td>${r.mq}</td>
+          <td>${r.fan}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch(SERVER_URL);
+        const data = await response.json();
+
+        if (data && !data.message) {
+          updateUI(data);
+          document.getElementById('connectionStatus').textContent = "Sistem activ - Live";
+        }
+      } catch (err) {
+        console.error("Eroare fetch:", err);
+        document.getElementById('connectionStatus').textContent = "Eroare conexiune";
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 3000);
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Comfort Control - Live</title>
+  <style>
+    :root {
+      --bg-1: #0b1020;
+      --bg-2: #111827;
+      --panel: rgba(17, 24, 39, 0.92);
+      --panel-2: rgba(15, 23, 42, 0.92);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.15);
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 25%),
+        radial-gradient(circle at top right, rgba(34, 197, 94, 0.10), transparent 22%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .hero {
+      flex: 1;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(17, 24, 39, 0.4));
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      color: #7dd3fc;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 36px;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.6;
+    }
+
+    .live-box {
+      min-width: 230px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .live-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.75);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .section-title {
+      margin: 8px 0 14px;
+      font-size: 18px;
+      color: #dbeafe;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .label {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .system-state {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .state-on { color: #86efac; }
+    .state-off { color: #fca5a5; }
+
+    .chip {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .good { background: rgba(34, 197, 94, 0.14); color: #86efac; }
+    .mid { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+    .bad { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+
+    @media (max-width: 860px) {
+      .topbar, .panels { grid-template-columns: 1fr; display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="hero">
+        <div class="eyebrow">Smart Comfort Control</div>
+        <h1>Monitorizare Ambientală</h1>
+      </div>
+
+      <div class="live-box">
+        <div class="live-row">
+          <span class="dot"></span>
+          <span id="connectionStatus">Se conectează...</span>
+        </div>
+        <small id="lastUpdate">Ultima actualizare: --:--:--</small>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">Temperatură</div>
+        <div class="value" id="tempValue">--°C</div>
+        <div class="status">Optim: 21–26°C</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Umiditate</div>
+        <div class="value" id="humValue">--%</div>
+        <div class="status">Optim: 40–60%</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Nivel zgomot</div>
+        <div class="value" id="noiseValue">-- dB</div>
+        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
+
+
+      </div>
+
+      <div class="card">
+        <div class="label">Calitate Aer</div>
+        <div class="value" id="mqValue">--</div>
+        <div class="status">Prag alertă: > 350</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Stare Sistem Actuatori</div>
+        <div class="system-state" id="fanState">Verificare...</div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="section-title">Istoric recent date</div>
+        <table class="table" id="historyTable">
+          <thead>
+            <tr>
+              <th>Ora</th>
+              <th>Temp</th>
+              <th>Umiditate</th>
+              <th>Zgomot</th>
+              <th>MQ135</th>
+              <th>Vent.</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const historyData = [];
+    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function getNow() {
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function updateUI(data) {
+      document.getElementById('tempValue').textContent = `${Number(data.temperature).toFixed(1)}°C`;
+      document.getElementById('humValue').textContent = `${data.humidity}%`;
+      document.getElementById('noiseValue').textContent = `${data.sound} dB`;
+      document.getElementById('mqValue').textContent = data.mq;
+      document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
+
+      // Folosim direct starea reala a ventilatorului din baza de date
+      const fanOn = Number(data.fan) === 1;
+      const fanEl = document.getElementById('fanState');
+      fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
+      fanEl.className = 'system-state ' + (fanOn ? 'state-on' : 'state-off');
+
+      // Volum muzica, dupa zgomot
+      let volume = 8;
+      if (data.sound >= 20 && data.sound < 50) volume = 15;
+      if (data.sound >= 50) volume = 22;
+      document.getElementById('musicVolume').textContent = volume;
+
+      // Comfort tag
+      const tag = document.getElementById('comfortTag');
+      if (data.mq > 350 || data.humidity > 70 || Number(data.fan) === 1) {
+        tag.textContent = "Atenție sistem activ";
+        tag.className = "chip bad";
+      } else if (data.temperature > 27) {
+        tag.textContent = "Disconfort Termic";
+        tag.className = "chip mid";
+      } else {
+        tag.textContent = "Confort Optim";
+        tag.className = "chip good";
+      }
+
+      // Istoric
+      const historyEntry = {
+        time: getNow(),
+        temp: Number(data.temperature),
+        hum: data.humidity,
+        noise: data.sound || 0,
+        mq: data.mq,
+        fan: Number(data.fan) === 1 ? 'ON' : 'OFF'
+      };
+
+      if (
+        historyData.length === 0 ||
+        historyData[0].temp !== historyEntry.temp ||
+        historyData[0].hum !== historyEntry.hum ||
+        historyData[0].noise !== historyEntry.noise ||
+        historyData[0].mq !== historyEntry.mq ||
+        historyData[0].fan !== historyEntry.fan
+      ) {
+        historyData.unshift(historyEntry);
+      }
+
+      if (historyData.length > 8) historyData.pop();
+
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = historyData.map(r => `
+        <tr>
+          <td>${r.time}</td>
+          <td>${r.temp.toFixed(1)}°C</td>
+          <td>${r.hum}%</td>
+          <td>${r.noise}</td>
+          <td>${r.mq}</td>
+          <td>${r.fan}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch(SERVER_URL);
+        const data = await response.json();
+
+        if (data && !data.message) {
+          updateUI(data);
+          document.getElementById('connectionStatus').textContent = "Sistem activ - Live";
+        }
+      } catch (err) {
+        console.error("Eroare fetch:", err);
+        document.getElementById('connectionStatus').textContent = "Eroare conexiune";
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 3000);
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Comfort Control - Live</title>
+  <style>
+    :root {
+      --bg-1: #0b1020;
+      --bg-2: #111827;
+      --panel: rgba(17, 24, 39, 0.92);
+      --panel-2: rgba(15, 23, 42, 0.92);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.15);
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 25%),
+        radial-gradient(circle at top right, rgba(34, 197, 94, 0.10), transparent 22%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .hero {
+      flex: 1;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(17, 24, 39, 0.4));
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      color: #7dd3fc;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 36px;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.6;
+    }
+
+    .live-box {
+      min-width: 230px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .live-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.75);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .section-title {
+      margin: 8px 0 14px;
+      font-size: 18px;
+      color: #dbeafe;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .label {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .system-state {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .state-on { color: #86efac; }
+    .state-off { color: #fca5a5; }
+
+    .chip {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .good { background: rgba(34, 197, 94, 0.14); color: #86efac; }
+    .mid { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+    .bad { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+
+    @media (max-width: 860px) {
+      .topbar, .panels { grid-template-columns: 1fr; display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="hero">
+        <div class="eyebrow">Smart Comfort Control</div>
+        <h1>Monitorizare Ambientală</h1>
+      </div>
+
+      <div class="live-box">
+        <div class="live-row">
+          <span class="dot"></span>
+          <span id="connectionStatus">Se conectează...</span>
+        </div>
+        <small id="lastUpdate">Ultima actualizare: --:--:--</small>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">Temperatură</div>
+        <div class="value" id="tempValue">--°C</div>
+        <div class="status">Optim: 21–26°C</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Umiditate</div>
+        <div class="value" id="humValue">--%</div>
+        <div class="status">Optim: 40–60%</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Nivel zgomot</div>
+        <div class="value" id="noiseValue">-- dB</div>
+        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
+
+
+      </div>
+
+      <div class="card">
+        <div class="label">Calitate Aer</div>
+        <div class="value" id="mqValue">--</div>
+        <div class="status">Prag alertă: > 350</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Stare Sistem Actuatori</div>
+        <div class="system-state" id="fanState">Verificare...</div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="section-title">Istoric recent date</div>
+        <table class="table" id="historyTable">
+          <thead>
+            <tr>
+              <th>Ora</th>
+              <th>Temp</th>
+              <th>Umiditate</th>
+              <th>Zgomot</th>
+              <th>MQ135</th>
+              <th>Vent.</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 
