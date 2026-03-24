@@ -200,8 +200,8 @@
     <div class="topbar">
       <div class="hero">
         <div class="eyebrow">Smart Comfort Control</div>
-        <h1>Monitorizare Ambientală (LIVE)</h1>
-        <p>Date colectate în timp real de la senzorii DHT11, MQ135 și Senzor de Zgomot.</p>
+        <h1>Monitorizare Ambientală</h1>
+    
       </div>
 
       <div class="live-box">
@@ -233,9 +233,15 @@
       </div>
 
       <div class="card">
-        <div class="label">Calitate Aer (MQ135)</div>
+        <div class="label">Calitate Aer</div>
         <div class="value" id="mqValue">--</div>
         <div class="status">Prag alertă: > 350</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Stare Sistem Actuatori</div>
+        <div class="system-state" id="fanState">Verificare...</div>
+        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
+        <div class="chip" id="comfortTag">Calculare...</div>
       </div>
     </div>
 
@@ -255,13 +261,6 @@
           </thead>
           <tbody></tbody>
         </table>
-      </div>
-
-      <div class="panel">
-        <div class="section-title">Stare Sistem Actuatori</div>
-        <div class="system-state" id="fanState">Verificare...</div>
-        <div class="status">Volum muzică calculat: <strong id="musicVolume">--</strong>/30</div>
-        <div class="chip" id="comfortTag">Calculare...</div>
       </div>
     </div>
   </div>
