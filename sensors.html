@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Comfort Control - Senzori</title>
+  <style>
+    :root {
+      --bg: #08101f;
+      --bg2: #0f172a;
+      --panel: rgba(15, 23, 42, 0.92);
+      --panel-soft: rgba(17, 24, 39, 0.92);
+      --line: rgba(148, 163, 184, 0.14);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+      --radius: 22px;
+      --sidebar: 250px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 22%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      min-height: 100vh;
+    }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar);
+      background: rgba(6, 12, 24, 0.92);
+      border-right: 1px solid var(--line);
+      padding: 26px 18px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    .brand { margin-bottom: 30px; }
+    .brand small {
+      display: block;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    .brand h2 { margin: 0; font-size: 22px; }
+
+    .nav { display: flex; flex-direction: column; gap: 10px; }
+    .nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-weight: 600;
+    }
+    .nav a:hover,
+    .nav a.active {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.18);
+    }
+
+    .main {
+      margin-left: var(--sidebar);
+      width: calc(100% - var(--sidebar));
+      padding: 28px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 34px;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .badge {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .sensor-card {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .sensor-card h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .sensor-value {
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .sensor-info {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .state {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ok { background: rgba(34, 197, 94, 0.14); color: #86efac; }
+    .warn { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+    .danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+
+    @media (max-width: 900px) {
+      .sensor-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .layout { flex-direction: column; }
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <small>Smart Comfort Control</small>
+        <h2>Panou de control</h2>
+      </div>
+
+      <nav class="nav">
+        <a href="index.html">Dashboard</a>
+        <a href="sensors.html" class="active">Stare senzori</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div>
+          <h1>Stare senzori</h1>
+          <p>Verificare individuală pentru fiecare senzor și interpretarea valorilor curente.</p>
+        </div>
+        <div class="badge" id="lastUpdate">Ultima actualizare: --:--:--</div>
+      </div>
+
+      <div class="sensor-grid">
+        <div class="sensor-card">
+          <h3>Senzor temperatură</h3>
+          <div class="sensor-value" id="tempValue">--°C</div>
+          <div class="sensor-info">DHT11 monitorizează temperatura ambientală. Interval recomandat: 21–26°C.</div>
+          <div class="state" id="tempState">Se verifică...</div>
+        </div>
+
+        <div class="sensor-card">
+          <h3>Senzor umiditate</h3>
+          <div class="sensor-value" id="humValue">--%</div>
+          <div class="sensor-info">DHT11 monitorizează umiditatea relativă. Interval recomandat: 40–60%.</div>
+          <div class="state" id="humState">Se verifică...</div>
+        </div>
+
+        <div class="sensor-card">
+          <h3>Senzor zgomot</h3>
+          <div class="sensor-value" id="noiseValue">-- dB</div>
+          <div class="sensor-info">Nivelul de zgomot este folosit pentru reglarea automată a volumului muzicii.</div>
+          <div class="state" id="noiseState">Se verifică...</div>
+        </div>
+
+        <div class="sensor-card">
+          <h3>Senzor calitate aer</h3>
+          <div class="sensor-value" id="mqValue">--</div>
+          <div class="sensor-info">MQ135 detectează variații ale calității aerului. Prag critic: peste 350.</div>
+          <div class="state" id="mqState">Se verifică...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function getNow() {
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function setState(id, text, cls) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'state ' + cls;
+    }
+
+    function updateUI(data) {
+      const t = Number(data.temperature);
+      const h = Number(data.humidity);
+      const s = Number(data.sound);
+      const mq = Number(data.mq);
+
+      document.getElementById('tempValue').textContent = `${t.toFixed(1)}°C`;
+      document.getElementById('humValue').textContent = `${h}%`;
+      document.getElementById('noiseValue').textContent = `${s} dB`;
+      document.getElementById('mqValue').textContent = mq;
+      document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
+
+      if (t >= 21 && t <= 26) setState('tempState', 'Temperatură normală', 'ok');
+      else if (t > 26 && t <= 30) setState('tempState', 'Temperatură ușor ridicată', 'warn');
+      else setState('tempState', 'Temperatură în afara intervalului', 'danger');
+
+      if (h >= 40 && h <= 60) setState('humState', 'Umiditate normală', 'ok');
+      else if (h > 60 && h <= 70) setState('humState', 'Umiditate ridicată', 'warn');
+      else setState('humState', 'Umiditate critică', 'danger');
+
+      if (s < 400) setState('noiseState', 'Zgomot redus', 'ok');
+      else if (s < 700) setState('noiseState', 'Zgomot moderat', 'warn');
+      else setState('noiseState', 'Zgomot ridicat', 'danger');
+
+      if (mq < 250) setState('mqState', 'Calitate aer bună', 'ok');
+      else if (mq <= 350) setState('mqState', 'Calitate aer moderată', 'warn');
+      else setState('mqState', 'Calitate aer slabă', 'danger');
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch(SERVER_URL);
+        const data = await response.json();
+        if (response.ok && data) updateUI(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 3000);
+  </script>
+</body>
+</html>
