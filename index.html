@@ -250,6 +250,7 @@
               <th>Umiditate</th>
               <th>Zgomot</th>
               <th>MQ135</th>
+              <th>Vent.</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -270,35 +271,35 @@
     const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
 
     function pad(n) { return String(n).padStart(2, '0'); }
+
     function getNow() {
       const d = new Date();
       return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
     function updateUI(data) {
-      // 1. Actualizare valori principale (Corectat noiseValue)
-      document.getElementById('tempValue').textContent = `${data.temperature.toFixed(1)}°C`;
+      document.getElementById('tempValue').textContent = `${Number(data.temperature).toFixed(1)}°C`;
       document.getElementById('humValue').textContent = `${data.humidity}%`;
-      document.getElementById('noiseValue').textContent = `${data.sound} dB`; 
+      document.getElementById('noiseValue').textContent = `${data.sound} dB`;
       document.getElementById('mqValue').textContent = data.mq;
       document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
 
-      // 2. Logica ventilator (Exemplu: Peste 28 grade sau aer poluat)
-      const fanOn = data.temperature > 28 || data.mq > 350;
+      // Folosim direct starea reala a ventilatorului din baza de date
+      const fanOn = Number(data.fan) === 1;
       const fanEl = document.getElementById('fanState');
       fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
       fanEl.className = 'system-state ' + (fanOn ? 'state-on' : 'state-off');
 
-      // 3. Logica Volum (Bazata pe zgomot real)
-      let volume = 10;
-      if (data.sound > 400) volume = 18;
-      if (data.sound > 700) volume = 25;
+      // Volum muzica, dupa zgomot
+      let volume = 8;
+      if (data.sound >= 20 && data.sound < 50) volume = 15;
+      if (data.sound >= 50) volume = 22;
       document.getElementById('musicVolume').textContent = volume;
 
-      // 4. Comfort Tag
+      // Comfort tag
       const tag = document.getElementById('comfortTag');
-      if (data.temperature > 30 || data.mq > 400) {
-        tag.textContent = "Calitate Scăzută";
+      if (data.mq > 350 || data.humidity > 70 || Number(data.fan) === 1) {
+        tag.textContent = "Atenție sistem activ";
         tag.className = "chip bad";
       } else if (data.temperature > 27) {
         tag.textContent = "Disconfort Termic";
@@ -308,19 +309,27 @@
         tag.className = "chip good";
       }
 
-      // 5. Istoric (Tabel)
+      // Istoric
       const historyEntry = {
         time: getNow(),
-        temp: data.temperature,
+        temp: Number(data.temperature),
         hum: data.humidity,
         noise: data.sound || 0,
-        mq: data.mq
+        mq: data.mq,
+        fan: Number(data.fan) === 1 ? 'ON' : 'OFF'
       };
 
-      if (historyData.length === 0 || historyData[0].temp !== historyEntry.temp) {
-          historyData.unshift(historyEntry);
+      if (
+        historyData.length === 0 ||
+        historyData[0].temp !== historyEntry.temp ||
+        historyData[0].hum !== historyEntry.hum ||
+        historyData[0].noise !== historyEntry.noise ||
+        historyData[0].mq !== historyEntry.mq ||
+        historyData[0].fan !== historyEntry.fan
+      ) {
+        historyData.unshift(historyEntry);
       }
-      
+
       if (historyData.length > 8) historyData.pop();
 
       const tbody = document.querySelector('#historyTable tbody');
@@ -331,6 +340,7 @@
           <td>${r.hum}%</td>
           <td>${r.noise}</td>
           <td>${r.mq}</td>
+          <td>${r.fan}</td>
         </tr>
       `).join('');
     }
@@ -339,7 +349,7 @@
       try {
         const response = await fetch(SERVER_URL);
         const data = await response.json();
-        
+
         if (data && !data.message) {
           updateUI(data);
           document.getElementById('connectionStatus').textContent = "Sistem activ - Live";
