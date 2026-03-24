@@ -326,15 +326,15 @@
       <nav class="nav">
         <a href="/index.html">Dashboard</a>
         <a href="/sensors.html">Stare senzori</a>
-        <a href="/control.html" class="active">Control manual</a>
+        <a href="/control.html" class="active">Control Sistem</a>
       </nav>
     </aside>
 
     <main class="main">
       <div class="topbar">
         <div class="page-title">
-          <h1>Control manual</h1>
-          <p>Alege modul de lucru și controlează direct muzica și ventilatorul.</p>
+          <h1>Control Sistem</h1>
+
         </div>
 
         <div class="status-badge" id="statusText">
@@ -342,13 +342,6 @@
         </div>
       </div>
 
-      <section class="hero">
-        <h2>Automat sau manual</h2>
-        <p>
-          În modul <strong>Auto</strong>, sistemul decide singur pe baza logicii tale și a fuzzy control.
-          În modul <strong>Manual</strong>, poți seta volumul și ventilatorul direct din interfață.
-        </p>
-      </section>
 
       <section class="grid">
         <div class="card">
@@ -368,7 +361,6 @@
             <input type="range" min="0" max="30" value="10" id="volumeSlider" />
             <div class="slider-value"><span id="volumeValue">10</span>/30</div>
           </div>
-          <div class="message">Activ doar în modul MANUAL.</div>
         </div>
 
         <div class="card">
@@ -378,11 +370,10 @@
             <button class="action-btn on-btn" id="fanOnBtn">Ventilator ON</button>
             <button class="action-btn off-btn" id="fanOffBtn">Ventilator OFF</button>
           </div>
-          <div class="message">Activ doar în modul MANUAL.</div>
         </div>
 
         <div class="card">
-          <h3>Rezumat comenzi</h3>
+          <h3>Rezumatul comenzilor</h3>
           <div class="summary">
             <div class="mini-card">
               <div class="k">Mod</div>
@@ -452,8 +443,8 @@
 
       modeInfo.textContent =
         controlState.mode === 'manual'
-          ? 'Modul MANUAL este activ. Comenzile tale vor fi aplicate.'
-          : 'Modul AUTO este activ. Sistemul decide automat.';
+          ? 'Modul MANUAL este activ.'
+          : 'Modul AUTO este activ.';
     }
 
     autoBtn.addEventListener('click', () => {
