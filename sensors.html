@@ -215,10 +215,10 @@
 
         <div class="sensor-card">
           <h3>Senzor zgomot</h3>
-          <div class="sensor-value" id="noiseValue">-- dB</div>
+          <div class="sensor-value" id="noiseValue">--</div>
           <div class="sensor-info">Nivelul de zgomot este folosit pentru reglarea automată a volumului muzicii.</div>
           <div class="state" id="noiseState">Se verifică...</div>
-        </div>
+        </div>    
 
         <div class="sensor-card">
           <h3>Senzor calitate aer</h3>
@@ -230,65 +230,71 @@
     </main>
   </div>
 
-  <script>
-    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
+<script>
+  const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function getNow() {
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function setState(id, text, cls) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'state ' + cls;
+  }
+
+  function getNoiseLabel(sound) {
+    if (sound < 300) return 'Zgomot scăzut';
+    if (sound < 700) return 'Zgomot mediu';
+    return 'Zgomot ridicat';
+  }
+
+  function updateUI(data) {
+    const t = Number(data.temperature);
+    const h = Number(data.humidity);
+    const s = Number(data.sound);
+    const mq = Number(data.mq);
+
+    document.getElementById('tempValue').textContent = `${t.toFixed(1)}°C`;
+    document.getElementById('humValue').textContent = `${h}%`;
+    document.getElementById('noiseValue').textContent = `${s}`;
+    document.getElementById('mqValue').textContent = mq;
+    document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
+
+    if (t >= 21 && t <= 26) setState('tempState', 'Temperatură normală', 'ok');
+    else if (t > 26 && t <= 30) setState('tempState', 'Temperatură ușor ridicată', 'warn');
+    else setState('tempState', 'Temperatură în afara intervalului', 'danger');
+
+    if (h >= 40 && h <= 60) setState('humState', 'Umiditate normală', 'ok');
+    else if (h > 60 && h <= 70) setState('humState', 'Umiditate ridicată', 'warn');
+    else setState('humState', 'Umiditate critică', 'danger');
+
+    if (s < 300) setState('noiseState', 'Zgomot scăzut', 'ok');
+    else if (s < 700) setState('noiseState', 'Zgomot mediu', 'warn');
+    else setState('noiseState', 'Zgomot ridicat', 'danger');
+
+    if (mq < 250) setState('mqState', 'Calitate aer bună', 'ok');
+    else if (mq <= 350) setState('mqState', 'Calitate aer moderată', 'warn');
+    else setState('mqState', 'Calitate aer slabă', 'danger');
+  }
+
+  async function fetchData() {
+    try {
+      const response = await fetch(SERVER_URL);
+      const data = await response.json();
+      if (response.ok && data) updateUI(data);
+    } catch (err) {
+      console.error(err);
     }
+  }
 
-    function getNow() {
-      const d = new Date();
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
-
-    function setState(id, text, cls) {
-      const el = document.getElementById(id);
-      el.textContent = text;
-      el.className = 'state ' + cls;
-    }
-
-    function updateUI(data) {
-      const t = Number(data.temperature);
-      const h = Number(data.humidity);
-      const s = Number(data.sound);
-      const mq = Number(data.mq);
-
-      document.getElementById('tempValue').textContent = `${t.toFixed(1)}°C`;
-      document.getElementById('humValue').textContent = `${h}%`;
-      document.getElementById('noiseValue').textContent = `${s} dB`;
-      document.getElementById('mqValue').textContent = mq;
-      document.getElementById('lastUpdate').textContent = `Ultima actualizare: ${getNow()}`;
-
-      if (t >= 21 && t <= 26) setState('tempState', 'Temperatură normală', 'ok');
-      else if (t > 26 && t <= 30) setState('tempState', 'Temperatură ușor ridicată', 'warn');
-      else setState('tempState', 'Temperatură în afara intervalului', 'danger');
-
-      if (h >= 40 && h <= 60) setState('humState', 'Umiditate normală', 'ok');
-      else if (h > 60 && h <= 70) setState('humState', 'Umiditate ridicată', 'warn');
-      else setState('humState', 'Umiditate critică', 'danger');
-
-      if (s < 400) setState('noiseState', 'Zgomot redus', 'ok');
-      else if (s < 700) setState('noiseState', 'Zgomot moderat', 'warn');
-      else setState('noiseState', 'Zgomot ridicat', 'danger');
-
-      if (mq < 250) setState('mqState', 'Calitate aer bună', 'ok');
-      else if (mq <= 350) setState('mqState', 'Calitate aer moderată', 'warn');
-      else setState('mqState', 'Calitate aer slabă', 'danger');
-    }
-
-    async function fetchData() {
-      try {
-        const response = await fetch(SERVER_URL);
-        const data = await response.json();
-        if (response.ok && data) updateUI(data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    fetchData();
-    setInterval(fetchData, 3000);
-  </script>
+  fetchData();
+  setInterval(fetchData, 3000);
+</script>
 </body>
 </html>

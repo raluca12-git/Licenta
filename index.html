@@ -368,8 +368,8 @@
 
         <div class="card">
           <div class="label">Nivel zgomot</div>
-          <div class="value" id="noiseValue">-- dB</div>
-          <div class="hint">Ajustare automată volum</div>
+          <div class="value" id="noiseValue">--</div>
+          <div class="hint">--</div>
         </div>
 
         <div class="card">
@@ -407,115 +407,128 @@
     </main>
   </div>
 
-  <script>
-    const historyData = [];
-    const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
+<script>
+  const historyData = [];
+  const SERVER_URL = 'https://licenta1.onrender.com/get-latest';
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function getNow() {
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function getNoiseLabel(sound) {
+    if (sound < 300) return 'SCĂZUT';
+    if (sound < 700) return 'MEDIU';
+    return 'RIDICAT';
+  }
+
+  function updateStatus(ok) {
+    const statusText = document.getElementById('connectionStatus');
+    const dot = document.getElementById('statusDot');
+
+    if (ok) {
+      statusText.textContent = 'Sistem activ';
+      dot.className = 'dot';
+    } else {
+      statusText.textContent = 'Conexiune indisponibilă';
+      dot.className = 'dot error-dot';
+    }
+  }
+
+  function updateUI(data) {
+    const sound = Number(data.sound);
+    const noiseLabel = getNoiseLabel(sound);
+
+    document.getElementById('tempValue').textContent = `${Number(data.temperature).toFixed(1)}°C`;
+    document.getElementById('humValue').textContent = `${data.humidity}%`;
+    document.getElementById('noiseValue').textContent = `${sound}`;
+    document.getElementById('mqValue').textContent = data.mq;
+    document.getElementById('lastUpdate').textContent = getNow();
+
+    // schimbă textul de sub cardul de zgomot
+    const noiseHint = document.querySelector('#noiseValue').nextElementSibling;
+    noiseHint.textContent = noiseLabel;
+
+    const fanOn = Number(data.fan) === 1;
+    const fanEl = document.getElementById('fanState');
+    fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
+    fanEl.className = 'fan-state ' + (fanOn ? 'fan-on' : 'fan-off');
+
+    let volume = 5;
+    if (sound >= 300 && sound < 700) volume = 15;
+    if (sound >= 700) volume = 28;
+    document.getElementById('musicVolume').textContent = volume;
+
+    const tag = document.getElementById('comfortTag');
+    if (data.mq > 350 || data.humidity > 70 || fanOn) {
+      tag.textContent = 'Atenție sistem activ';
+      tag.className = 'chip bad';
+    } else if (data.temperature > 27) {
+      tag.textContent = 'Disconfort termic';
+      tag.className = 'chip mid';
+    } else {
+      tag.textContent = 'Confort optim';
+      tag.className = 'chip good';
     }
 
-    function getNow() {
-      const d = new Date();
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    const historyEntry = {
+      time: getNow(),
+      temp: Number(data.temperature),
+      hum: data.humidity,
+      noise: sound,
+      mq: data.mq,
+      fan: fanOn ? 'ON' : 'OFF'
+    };
+
+    if (
+      historyData.length === 0 ||
+      historyData[0].temp !== historyEntry.temp ||
+      historyData[0].hum !== historyEntry.hum ||
+      historyData[0].noise !== historyEntry.noise ||
+      historyData[0].mq !== historyEntry.mq ||
+      historyData[0].fan !== historyEntry.fan
+    ) {
+      historyData.unshift(historyEntry);
     }
 
-    function updateStatus(ok) {
-      const statusText = document.getElementById('connectionStatus');
-      const dot = document.getElementById('statusDot');
+    if (historyData.length > 8) historyData.pop();
 
-      if (ok) {
-        statusText.textContent = 'Sistem activ';
-        dot.className = 'dot';
+    const tbody = document.querySelector('#historyTable tbody');
+    tbody.innerHTML = historyData.map(r => `
+      <tr>
+        <td>${r.time}</td>
+        <td>${r.temp.toFixed(1)}°C</td>
+        <td>${r.hum}%</td>
+        <td>${r.noise}</td>
+        <td>${r.mq}</td>
+        <td>${r.fan}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function fetchData() {
+    try {
+      const response = await fetch(SERVER_URL);
+      const data = await response.json();
+
+      if (response.ok && data) {
+        updateUI(data);
+        updateStatus(true);
       } else {
-        statusText.textContent = 'Conexiune indisponibilă';
-        dot.className = 'dot error-dot';
-      }
-    }
-
-    function updateUI(data) {
-      document.getElementById('tempValue').textContent = `${Number(data.temperature).toFixed(1)}°C`;
-      document.getElementById('humValue').textContent = `${data.humidity}%`;
-      document.getElementById('noiseValue').textContent = `${data.sound} dB`;
-      document.getElementById('mqValue').textContent = data.mq;
-      document.getElementById('lastUpdate').textContent = getNow();
-
-      const fanOn = Number(data.fan) === 1;
-      const fanEl = document.getElementById('fanState');
-      fanEl.textContent = fanOn ? 'Ventilator ON' : 'Ventilator OFF';
-      fanEl.className = 'fan-state ' + (fanOn ? 'fan-on' : 'fan-off');
-
-      let volume = 8;
-      if (data.sound >= 20 && data.sound < 50) volume = 15;
-      if (data.sound >= 50) volume = 22;
-      document.getElementById('musicVolume').textContent = volume;
-
-      const tag = document.getElementById('comfortTag');
-      if (data.mq > 350 || data.humidity > 70 || fanOn) {
-        tag.textContent = 'Atenție sistem activ';
-        tag.className = 'chip bad';
-      } else if (data.temperature > 27) {
-        tag.textContent = 'Disconfort termic';
-        tag.className = 'chip mid';
-      } else {
-        tag.textContent = 'Confort optim';
-        tag.className = 'chip good';
-      }
-
-      const historyEntry = {
-        time: getNow(),
-        temp: Number(data.temperature),
-        hum: data.humidity,
-        noise: data.sound || 0,
-        mq: data.mq,
-        fan: fanOn ? 'ON' : 'OFF'
-      };
-
-      if (
-        historyData.length === 0 ||
-        historyData[0].temp !== historyEntry.temp ||
-        historyData[0].hum !== historyEntry.hum ||
-        historyData[0].noise !== historyEntry.noise ||
-        historyData[0].mq !== historyEntry.mq ||
-        historyData[0].fan !== historyEntry.fan
-      ) {
-        historyData.unshift(historyEntry);
-      }
-
-      if (historyData.length > 8) historyData.pop();
-
-      const tbody = document.querySelector('#historyTable tbody');
-      tbody.innerHTML = historyData.map(r => `
-        <tr>
-          <td>${r.time}</td>
-          <td>${r.temp.toFixed(1)}°C</td>
-          <td>${r.hum}%</td>
-          <td>${r.noise}</td>
-          <td>${r.mq}</td>
-          <td>${r.fan}</td>
-        </tr>
-      `).join('');
-    }
-
-    async function fetchData() {
-      try {
-        const response = await fetch(SERVER_URL);
-        const data = await response.json();
-
-        if (response.ok && data) {
-          updateUI(data);
-          updateStatus(true);
-        } else {
-          updateStatus(false);
-        }
-      } catch (err) {
         updateStatus(false);
-        console.error(err);
       }
+    } catch (err) {
+      updateStatus(false);
+      console.error(err);
     }
+  }
 
-    fetchData();
-    setInterval(fetchData, 3000);
-  </script>
+  fetchData();
+  setInterval(fetchData, 3000);
+</script>
 </body>
 </html>
