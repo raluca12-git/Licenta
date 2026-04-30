@@ -24,6 +24,9 @@ async function initDb() {
       fan_percent INT DEFAULT 0,
       fuzzy_level VARCHAR(20) DEFAULT 'scazut',
       mode VARCHAR(20) DEFAULT 'auto',
+      kalman_sound FLOAT DEFAULT 0,
+      pid_error FLOAT DEFAULT 0,
+      target_sound FLOAT DEFAULT 500,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
@@ -32,6 +35,9 @@ async function initDb() {
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS fan_percent INT DEFAULT 0;`);
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS fuzzy_level VARCHAR(20) DEFAULT 'scazut';`);
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS mode VARCHAR(20) DEFAULT 'auto';`);
+  await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS kalman_sound FLOAT DEFAULT 0;`);
+  await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS pid_error FLOAT DEFAULT 0;`);
+  await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS target_sound FLOAT DEFAULT 500;`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS control_state (
@@ -50,7 +56,8 @@ async function initDb() {
   `);
 }
 
-initDb().then(() => console.log("DB initializat"))
+initDb()
+  .then(() => console.log("DB initializat"))
   .catch((err) => console.error("Eroare init DB:", err));
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
@@ -103,7 +110,7 @@ app.post("/set-controls", async (req, res) => {
     }
 
     if (![0, 20, 40, 60, 80, 100].includes(fan)) {
-      return res.status(400).json({ error: "Stare ventilator invalidă" });
+      return res.status(400).json({ error: "Treaptă ventilator invalidă" });
     }
 
     const result = await pool.query(
@@ -133,6 +140,9 @@ app.post("/update-data", async (req, res) => {
       fanPercent = 0,
       fuzzyLevel = "scazut",
       mode = "auto",
+      kalmanSound = 0,
+      pidError = 0,
+      targetSound = 500,
     } = req.body;
 
     if ([temperature, humidity, mq, sound, fan].some((v) => v === undefined)) {
@@ -141,9 +151,22 @@ app.post("/update-data", async (req, res) => {
 
     await pool.query(
       `INSERT INTO sensor_data
-       (temperature, humidity, mq, sound, fan, volume, fan_percent, fuzzy_level, mode)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [temperature, humidity, mq, sound, fan, volume, fanPercent, fuzzyLevel, mode]
+       (temperature, humidity, mq, sound, fan, volume, fan_percent, fuzzy_level, mode, kalman_sound, pid_error, target_sound)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+      [
+        temperature,
+        humidity,
+        mq,
+        sound,
+        fan,
+        volume,
+        fanPercent,
+        fuzzyLevel,
+        mode,
+        kalmanSound,
+        pidError,
+        targetSound,
+      ]
     );
 
     res.status(200).json({ success: true, message: "Date salvate" });
@@ -156,7 +179,9 @@ app.post("/update-data", async (req, res) => {
 app.get("/get-latest", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM sensor_data ORDER BY created_at DESC LIMIT 1");
-    if (result.rows.length === 0) return res.status(404).json({ error: "Nu există date în tabel" });
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Nu există date în tabel" });
+    }
     res.json(result.rows[0]);
   } catch (error) {
     console.error("Eroare la /get-latest:", error);
