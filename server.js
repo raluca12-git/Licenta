@@ -102,7 +102,7 @@ app.post("/set-controls", async (req, res) => {
       return res.status(400).json({ error: "Volum invalid" });
     }
 
-    if (![0, 1].includes(fan)) {
+    if (![0, 20, 40, 60, 80, 100].includes(fan)) {
       return res.status(400).json({ error: "Stare ventilator invalidă" });
     }
 
