@@ -15,11 +15,11 @@
     <nav class="nav"><a href="index.html">Dashboard</a><a href="sensors.html">Stare senzori</a><a href="statistics.html">Statistici</a><a href="control.html" class="active">Control sistem</a></nav>
   </aside>
   <main class="main">
-    <div class="topbar"><div class="page-title"><h1>Control Sistem</h1><p>Comenzi sincronizate în baza de date pentru ESP32.</p></div><div class="status-badge" id="statusText">Configurație neîncărcată</div></div>
+    <div class="topbar"><div class="page-title"><h1>Control Sistem</h1></div><div class="status-badge" id="statusText">Configurație neîncărcată</div></div>
     <section class="grid">
-      <div class="card"><h3>Mod sistem</h3><div class="label">În AUTO decide algoritmul fuzzy. În MANUAL se aplică comenzile de mai jos.</div><div class="mode-switch"><button class="mode-btn" id="autoBtn">AUTO</button><button class="mode-btn" id="manualBtn">MANUAL</button></div><div class="message" id="modeInfo"></div></div>
-      <div class="card"><h3>Control muzică</h3><div class="label">Setează volumul manual între 0 și 30</div><input type="range" min="0" max="30" value="10" id="volumeSlider"/><div class="slider-value"><span id="volumeValue">10</span>/30</div></div>
-      <div class="card"><h3>Control ventilator</h3><div class="label">Alege treapta manuală a ventilatorului</div><div class="fan-actions" id="fanPercentButtons">
+      <div class="card"><h3>Mod sistem</h3><div class="label">Alege modul de funcționare:</div><div class="mode-switch"><button class="mode-btn" id="autoBtn">AUTO</button><button class="mode-btn" id="manualBtn">MANUAL</button></div><div class="message" id="modeInfo"></div></div>
+      <div class="card"><h3>Control muzică</h3><div class="label">Setează volumul manual:</div><input type="range" min="0" max="30" value="10" id="volumeSlider"/><div class="slider-value"><span id="volumeValue">10</span>/30</div></div>
+      <div class="card"><h3>Control ventilator</h3><div class="label">Alege treapta manuală a ventilatorului:</div><div class="fan-actions" id="fanPercentButtons">
         <button class="fan-percent-btn off" data-fan="0">0%</button>
         <button class="fan-percent-btn" data-fan="20">20%</button>
         <button class="fan-percent-btn" data-fan="40">40%</button>
