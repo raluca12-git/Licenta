@@ -65,7 +65,6 @@ app.get("/sensors.html", (req, res) => res.sendFile(path.join(__dirname, "sensor
 app.get("/control.html", (req, res) => res.sendFile(path.join(__dirname, "control.html")));
 app.get("/fuzzy.html", (req, res) => res.sendFile(path.join(__dirname, "fuzzy.html")));
 app.get("/pid.html", (req, res) => res.sendFile(path.join(__dirname, "pid.html")));
-app.get("/history.html", (req, res) => res.sendFile(path.join(__dirname, "history.html")));
 
 function normalizeControls(row) {
   return {
