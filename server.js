@@ -63,7 +63,8 @@ initDb()
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.get("/sensors.html", (req, res) => res.sendFile(path.join(__dirname, "sensors.html")));
 app.get("/control.html", (req, res) => res.sendFile(path.join(__dirname, "control.html")));
-app.get("/statistics.html", (req, res) => res.sendFile(path.join(__dirname, "statistics.html")));
+app.get("/fuzzy.html", (req, res) => res.sendFile(path.join(__dirname, "fuzzy.html")));
+app.get("/pid.html", (req, res) => res.sendFile(path.join(__dirname, "pid.html")));
 
 function normalizeControls(row) {
   return {
