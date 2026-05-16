@@ -101,6 +101,97 @@ font-size:22px;
 .flow-arrow{transform:rotate(90deg);padding:4px 0}
 }
 
+
+/* CENTRARE TEXT CARDURI */
+.metric,
+.card,
+.panel,
+.mini,
+.param,
+.recommend-chip,
+.process-stage,
+.output-box,
+.target,
+.badge,
+.system-card,
+.side-status{
+text-align:center;
+}
+
+.metric{
+justify-content:center;
+}
+
+.metric > div:not(.metric-icon),
+.card > div:not(.icon),
+.recommend-title{
+text-align:center;
+}
+
+.metric-icon,
+.icon,
+.recommend-icon,
+.target-icon{
+flex-shrink:0;
+}
+
+.panel h3,
+.panel p,
+.card h3,
+.card p,
+.k,
+.label,
+.sub,
+.v,
+.mini .k,
+.mini .v,
+.param .k,
+.param .v{
+text-align:center;
+}
+
+.actions{
+justify-content:center;
+}
+
+.mini-grid,
+.params,
+.recommend-details{
+align-items:stretch;
+}
+
+.process-item{
+flex-direction:column;
+justify-content:center;
+text-align:center;
+gap:6px;
+}
+
+.process-item span,
+.process-item b{
+text-align:center;
+}
+
+.output-grid{
+text-align:center;
+}
+
+.table th,
+.table td{
+text-align:center;
+}
+
+.scale{
+justify-content:center;
+}
+
+@media(max-width:820px){
+.metric,
+.card{
+flex-direction:column;
+}
+}
+
 </style></head><body><div class="layout"><aside class="sidebar"><div class="brand"><small>Smart Comfort Control</small><h2>Panou de control</h2></div><nav class="nav"><a href="index.html"><span class="ico">⌂</span>Dashboard</a><a href="sensors.html" class="active"><span class="ico">◎</span>Stare senzori</a><a href="fuzzy.html"><span class="ico">⌘</span>Reglare ventilație</a><a href="pid.html"><span class="ico">♫</span>Reglare audio</a><a href="control.html"><span class="ico">⚙</span>Control sistem</a><a href="history.html"><span class="ico">☷</span>Istoric valori</a></nav><div class="system-card"><b><span class="dot"></span>Sistem activ</b><p>Toate subsistemele funcționează normal<br><span id="sideUpdate">--</span></p></div></aside><main class="main">
 <div class="header"><div class="title"><h1>Stare senzori</h1><p>Monitorizare detaliată pentru senzori și valori calculate.</p></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
 <section class="grid3"><div class="metric blue"><div class="metric-icon">🌡</div><div><div class="label">Senzor temperatură</div><div class="val" id="temp">-- °C</div><div class="sub" id="tempState">--</div></div></div><div class="metric green"><div class="metric-icon">💧</div><div><div class="label">Senzor umiditate</div><div class="val" id="hum">-- %</div><div class="sub" id="humState">--</div></div></div><div class="metric yellow"><div class="metric-icon">☁</div><div><div class="label">Senzor MQ135</div><div class="val" id="mq">--</div><div class="sub" id="mqState">--</div></div></div></section>
