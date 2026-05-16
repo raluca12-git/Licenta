@@ -392,7 +392,7 @@ margin-top:30px!important;
 const SENSOR_ALERT_LIMITS={
 temperature:{label:'Temperatură',warn:26,critical:30,unit:'°C'},
 humidity:{label:'Umiditate',warn:60,critical:70,unit:'%'},
-mq:{label:'Calitate aer MQ135',warn:250,critical:350,unit:''},
+mq:{label:'Calitate aer',warn:250,critical:350,unit:''},
 sound:{label:'Nivel zgomot',warn:700,critical:900,unit:''}
 };
 
@@ -468,7 +468,7 @@ key,
 }
 </script>
 <div class="layout"><aside class="sidebar"><div class="brand"><small>Smart Comfort Control</small><h2>Panou de control</h2></div><nav class="nav"><a href="index.html" class="active"><span class="ico">⌂</span>Dashboard</a><a href="sensors.html"><span class="ico">◎</span>Stare senzori</a><a href="fuzzy.html"><span class="ico">⌘</span>Reglare ventilație</a><a href="pid.html"><span class="ico">♫</span>Reglare audio</a><a href="control.html"><span class="ico">⚙</span>Control sistem</a><a href="history.html"><span class="ico">☷</span>Istoric valori</a></nav><div class="system-card"><b><span class="dot"></span>Sistem activ</b><p>Ultima actualizare<br><span id="sideUpdate">--</span></p></div></aside><main class="main">
-<div class="header"><div class="title"><h1>Dashboard</h1><p>Monitorizare live pentru confort ambiental.</p></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
+<div class="header"><div class="title"><h1>Dashboard</h1></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
 <section class="grid4"><div class="metric blue"><div class="metric-icon">🌡</div><div><div class="label">Temperatură</div><div class="val" id="tempValue">-- °C</div><div class="sub">Interval recomandat 21–26 °C</div></div></div><div class="metric green"><div class="metric-icon">💧</div><div><div class="label">Umiditate</div><div class="val" id="humValue">-- %</div><div class="sub">Interval recomandat 40–60%</div></div></div><div class="metric purple"><div class="metric-icon">⌁</div><div><div class="label">Nivel zgomot</div><div class="val" id="noiseValue">--</div><div class="sub" id="noiseHint">--</div></div></div><div class="metric yellow"><div class="metric-icon">☁</div><div><div class="label">Calitate aer MQ135</div><div class="val" id="mqValue">--</div><div class="sub">Prag alertă peste 350</div></div></div></section>
 <section class="grid2"><div class="panel"><h3>Stare actuatori</h3><div class="mini-grid"><div class="mini"><div class="k">Ventilator</div><div class="v" id="fanState">--</div></div><div class="mini"><div class="k">Treaptă ventilator</div><div class="v" id="fanPercent">--%</div></div><div class="mini"><div class="k">Volum</div><div class="v" id="volume">--/30</div></div><div class="mini"><div class="k">Mod</div><div class="v" id="mode">--</div></div></div></div><div class="panel recommend-card">
 <h3 style="display:none">Recomandare sistem</h3>
@@ -476,7 +476,6 @@ key,
   <div class="recommend-icon" id="recommendIcon">◎</div>
   <div class="recommend-title">
     <h3>Recomandare sistem</h3>
-    <p>Interpretare automată pe baza valorilor curente.</p>
   </div>
 </div>
 <div class="state ok" id="comfortTag">--</div>

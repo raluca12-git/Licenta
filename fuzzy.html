@@ -260,24 +260,24 @@ margin-top:30px!important;
 </aside>
 <main class="main">
   <div class="header">
-    <div class="title"><div class="title-icon">🌀</div><div><h1>Reglare ventilație (Fuzzy Logic)</h1><p>Sistemul fuzzy evaluează calitatea mediului și stabilește treapta optimă a ventilatorului.</p></div></div>
+    <div class="title"><div class="title-icon"></div><div><h1>Reglare ventilație</h1><p>Sistemul fuzzy evaluează calitatea mediului și stabilește treapta optimă a ventilatorului.</p></div></div>
     <div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div>
   </div>
 
   <section class="grid4">
     <div class="card"><div class="icon">🌡</div><div><div class="k">Temperatură</div><div class="v" id="tempNow">-- °C</div><div class="sub" id="tempLevel">Nivel: --</div></div></div>
     <div class="card"><div class="icon">💧</div><div><div class="k">Umiditate</div><div class="v" id="humNow">-- %</div><div class="sub" id="humLevel">Nivel: --</div></div></div>
-    <div class="card"><div class="icon">☁</div><div><div class="k">MQ135</div><div class="v" id="mqNow">--</div><div class="sub" id="mqLevel">Nivel: --</div></div></div>
-    <div class="card"><div class="icon purple">✤</div><div><div class="k">Ventilator (ieșire fuzzy)</div><div class="v" id="fanNow">-- %</div><div class="sub" id="fuzzyText">Nivel: --</div></div></div>
+    <div class="card"><div class="icon">☁</div><div><div class="k">Gaz</div><div class="v" id="mqNow">--</div><div class="sub" id="mqLevel">Nivel: --</div></div></div>
+    <div class="card"><div class="icon purple">✤</div><div><div class="k">Ventilator</div><div class="v" id="fanNow">-- %</div><div class="sub" id="fuzzyText">Nivel: --</div></div></div>
   </section>
 
   <section class="grid2">
-    <div class="chart-card"><h3>Evoluția parametrilor și ieșirea fuzzy</h3><p>Ultimele 60 de înregistrări.</p><div class="chart-wrap"><canvas id="fuzzyDecisionChart"></canvas></div></div>
-    <div class="chart-card"><h3>Încadrarea în categorii lingvistice</h3><p>Valorile curente și funcțiile de apartenență utilizate în procesul fuzzy.</p><div class="membership-grid"><div class="membership"><h4>Temperatură (°C)</h4><div class="mini-chart"><canvas id="tempMember"></canvas></div></div><div class="membership"><h4>Umiditate (%)</h4><div class="mini-chart"><canvas id="humMember"></canvas></div></div><div class="membership"><h4>MQ135</h4><div class="mini-chart"><canvas id="mqMember"></canvas></div></div></div><div class="legend"><span class="lg"><span class="bullet" style="background:#38bdf8"></span>mică/mic</span><span class="lg"><span class="bullet" style="background:#22c55e"></span>medie/mediu</span><span class="lg"><span class="bullet" style="background:#ef4444"></span>mare</span></div></div>
+    <div class="chart-card"><h3>Evoluția parametrilor</h3><p>Ultimele 60 de înregistrări.</p><div class="chart-wrap"><canvas id="fuzzyDecisionChart"></canvas></div></div>
+    <div class="chart-card"><h3>Funcțiile de apartenență utilizate în procesul Fuzzy</h3><div class="membership-grid"><div class="membership"><h4>Temperatură (°C)</h4><div class="mini-chart"><canvas id="tempMember"></canvas></div></div><div class="membership"><h4>Umiditate (%)</h4><div class="mini-chart"><canvas id="humMember"></canvas></div></div><div class="membership"><h4>Gaz</h4><div class="mini-chart"><canvas id="mqMember"></canvas></div></div></div><div class="legend"><span class="lg"><span class="bullet" style="background:#38bdf8"></span>mică/mic</span><span class="lg"><span class="bullet" style="background:#22c55e"></span>medie/mediu</span><span class="lg"><span class="bullet" style="background:#ef4444"></span>mare</span></div></div>
   </section>
 
   <section class="grid2">
-    <div class="chart-card"><h3>Heatmap intensitate ventilator (%)</h3><p>Reguli fuzzy evaluate pentru combinațiile posibile ale intrărilor.</p><div class="heat-wrap"><table class="matrix" id="ruleMatrix"></table></div><div class="scale"><span>Treaptă ventilator (%)</span><div class="scale-bar"></div></div><div class="scale-labels"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div></div>
+    <div class="chart-card"><h3>Evoluția treptelor ventilatorului</h3><div class="heat-wrap"><table class="matrix" id="ruleMatrix"></table></div><div class="scale"><span>Treaptă ventilator (%)</span><div class="scale-bar"></div></div><div class="scale-labels"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div></div>
     </section>
 </main>
 </div>
