@@ -18,7 +18,7 @@ async function initDb() {
       temperature FLOAT,
       humidity FLOAT,
       mq INT,
-      sound INT,
+      sound FLOAT,
       fan INT,
       volume INT DEFAULT 10,
       fan_percent INT DEFAULT 0,
@@ -38,6 +38,7 @@ async function initDb() {
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS kalman_sound FLOAT DEFAULT 0;`);
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS pid_error FLOAT DEFAULT 0;`);
   await pool.query(`ALTER TABLE sensor_data ADD COLUMN IF NOT EXISTS target_sound FLOAT DEFAULT 500;`);
+  await pool.query(`ALTER TABLE sensor_data ALTER COLUMN sound TYPE FLOAT USING sound::FLOAT;`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS control_state (

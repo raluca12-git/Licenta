@@ -17,7 +17,7 @@
       <div>
         <div class="label">Zgomot brut</div>
         <div class="val" id="sound">--</div>
-        <div class="sub">MAX4466</div>
+        <div class="sub">MAX4466 (dB)</div>
       </div>
     </div>
 
@@ -78,11 +78,11 @@ async function load(){
     document.getElementById('temp').textContent=Number(d.temperature).toFixed(1)+' °C';
     document.getElementById('hum').textContent=Number(d.humidity).toFixed(0)+' %';
     document.getElementById('mq').textContent=d.mq;
-    document.getElementById('sound').textContent=d.sound;
+    document.getElementById('sound').textContent=(d.sound!==undefined&&d.sound!==null)?Number(d.sound).toFixed(1)+' dB':'--';
 
-    document.getElementById('kalman').textContent=Number(d.kalman_sound||0).toFixed(1);
-    document.getElementById('target').textContent=d.target_sound||500;
-    document.getElementById('pidError').textContent=Number(d.pid_error||0).toFixed(1);
+    document.getElementById('kalman').textContent=Number(d.kalman_sound||0).toFixed(1)+' dB';
+    document.getElementById('target').textContent=(d.target_sound!==undefined&&d.target_sound!==null)?Number(d.target_sound).toFixed(1)+' dB':'--';
+    document.getElementById('pidError').textContent=Number(d.pid_error||0).toFixed(1)+' dB';
     document.getElementById('pidVol').textContent=(d.volume??'--')+'/30';
 
     document.getElementById('fuzzy').textContent=(d.fuzzy_level||'--').toUpperCase();

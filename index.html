@@ -393,7 +393,7 @@ const SENSOR_ALERT_LIMITS={
 temperature:{label:'Temperatură',warn:26,critical:30,unit:'°C'},
 humidity:{label:'Umiditate',warn:60,critical:70,unit:'%'},
 mq:{label:'Calitate aer',warn:250,critical:350,unit:''},
-sound:{label:'Nivel zgomot',warn:700,critical:900,unit:''}
+sound:{label:'Nivel zgomot',warn:45,critical:60,unit:' dB'}
 };
 
 function sensorAlertId(key){
@@ -469,7 +469,7 @@ key,
 </script>
 <div class="layout"><aside class="sidebar"><div class="brand"><small>Smart Comfort Control</small><h2>Panou de control</h2></div><nav class="nav"><a href="index.html" class="active"><span class="ico">⌂</span>Dashboard</a><a href="sensors.html"><span class="ico">◎</span>Stare senzori</a><a href="fuzzy.html"><span class="ico">⌘</span>Reglare ventilație</a><a href="pid.html"><span class="ico">♫</span>Reglare audio</a><a href="control.html"><span class="ico">⚙</span>Control sistem</a><a href="history.html"><span class="ico">☷</span>Istoric valori</a></nav><div class="system-card"><b><span class="dot"></span>Sistem activ</b><p>Ultima actualizare<br><span id="sideUpdate">--</span></p></div></aside><main class="main">
 <div class="header"><div class="title"><h1>Dashboard</h1></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
-<section class="grid4"><div class="metric blue"><div class="metric-icon">🌡</div><div><div class="label">Temperatură</div><div class="val" id="tempValue">-- °C</div><div class="sub">Interval recomandat 21–26 °C</div></div></div><div class="metric green"><div class="metric-icon">💧</div><div><div class="label">Umiditate</div><div class="val" id="humValue">-- %</div><div class="sub">Interval recomandat 40–60%</div></div></div><div class="metric purple"><div class="metric-icon">⌁</div><div><div class="label">Nivel zgomot</div><div class="val" id="noiseValue">--</div><div class="sub" id="noiseHint">--</div></div></div><div class="metric yellow"><div class="metric-icon">☁</div><div><div class="label">Calitate aer</div><div class="val" id="mqValue">--</div><div class="sub">Prag alertă peste 350</div></div></div></section>
+<section class="grid4"><div class="metric blue"><div class="metric-icon">🌡</div><div><div class="label">Temperatură</div><div class="val" id="tempValue">-- °C</div><div class="sub">Interval recomandat 21–26 °C</div></div></div><div class="metric green"><div class="metric-icon">💧</div><div><div class="label">Umiditate</div><div class="val" id="humValue">-- %</div><div class="sub">Interval recomandat 40–60%</div></div></div><div class="metric purple"><div class="metric-icon">⌁</div><div><div class="label">Nivel zgomot</div><div class="val" id="noiseValue">-- dB</div><div class="sub" id="noiseHint">--</div></div></div><div class="metric yellow"><div class="metric-icon">☁</div><div><div class="label">Calitate aer</div><div class="val" id="mqValue">--</div><div class="sub">Prag alertă peste 350</div></div></div></section>
 <section class="grid2"><div class="panel"><h3>Stare actuatori</h3><div class="mini-grid"><div class="mini"><div class="k">Ventilator</div><div class="v" id="fanState">--</div></div><div class="mini"><div class="k">Treaptă ventilator</div><div class="v" id="fanPercent">--%</div></div><div class="mini"><div class="k">Volum</div><div class="v" id="volume">--/30</div></div><div class="mini"><div class="k">Mod</div><div class="v" id="mode">--</div></div></div></div><div class="panel recommend-card">
 <h3 style="display:none">Recomandare sistem</h3>
 <div class="recommend-head">
@@ -487,8 +487,8 @@ key,
 </div>
 </div></section>
 <script>
-function noiseLabel(s){if(s<300)return 'Zgomot scăzut';if(s<700)return 'Zgomot mediu';return 'Zgomot ridicat'}
-async function load(){try{const r=await fetch('/get-latest');const d=await r.json();if(!r.ok)return;setUpdate();checkSensorAlerts(d);document.getElementById('tempValue').textContent=Number(d.temperature).toFixed(1)+' °C';document.getElementById('humValue').textContent=Number(d.humidity).toFixed(0)+' %';document.getElementById('noiseValue').textContent=d.sound;document.getElementById('noiseHint').textContent=noiseLabel(Number(d.sound));document.getElementById('mqValue').textContent=d.mq;const fp=fuzzyValue(d);document.getElementById('fanState').textContent=Number(d.fan)?'ON':'OFF';document.getElementById('fanPercent').textContent=fp+'%';document.getElementById('volume').textContent=(d.volume??'--')+'/30';document.getElementById('mode').textContent=(d.mode||'auto').toUpperCase();const tag=document.getElementById('comfortTag');
+function noiseLabel(s){if(s<35)return 'Zgomot scăzut';if(s<50)return 'Zgomot mediu';return 'Zgomot ridicat'}
+async function load(){try{const r=await fetch('/get-latest');const d=await r.json();if(!r.ok)return;setUpdate();checkSensorAlerts(d);document.getElementById('tempValue').textContent=Number(d.temperature).toFixed(1)+' °C';document.getElementById('humValue').textContent=Number(d.humidity).toFixed(0)+' %';document.getElementById('noiseValue').textContent=(d.sound!==undefined&&d.sound!==null)?Number(d.sound).toFixed(1)+' dB':'--';document.getElementById('noiseHint').textContent=noiseLabel(Number(d.sound));document.getElementById('mqValue').textContent=d.mq;const fp=fuzzyValue(d);document.getElementById('fanState').textContent=Number(d.fan)?'ON':'OFF';document.getElementById('fanPercent').textContent=fp+'%';document.getElementById('volume').textContent=(d.volume??'--')+'/30';document.getElementById('mode').textContent=(d.mode||'auto').toUpperCase();const tag=document.getElementById('comfortTag');
 const comfort=document.getElementById('comfortText');
 const icon=document.getElementById('recommendIcon');
 const audioAction=document.getElementById('audioAction');
@@ -500,10 +500,10 @@ const hum=Number(d.humidity||0);
 const mode=(d.mode||'auto').toUpperCase();
 
 systemActionMode.textContent=mode;
-audioAction.textContent=sound>=700?'Volum crescut':sound>=300?'Volum adaptiv':'Volum stabil';
+audioAction.textContent=sound>=50?'Volum crescut':sound>=35?'Volum adaptiv':'Volum stabil';
 fanAction.textContent=fp>0?('Ventilator '+fp+'%'):'Ventilator oprit';
 
-if(sound>=700){
+if(sound>=50){
   tag.textContent='Acțiune audio';
   tag.className='state warn';
   icon.textContent='🔊';
