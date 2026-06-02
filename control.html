@@ -236,30 +236,6 @@ margin-top:30px!important;
 }
 }
 
-
-.system-card b,.status-active{color:#2563eb !important;}
-.dot{background:#2563eb !important;box-shadow:0 0 10px rgba(37,99,235,.5)!important;}
-
-.alert-popup,.alert-box,.alert-modal,.alert{
-background:#fff4f4 !important;
-color:#7f1d1d !important;
-border:1px solid #ef4444 !important;
-}
-
-.alert-popup button,.alert-box button,.alert-modal button,.alert button{
-background:#ef4444 !important;
-color:#fff !important;
-}
-
-canvas{
-background:#fffaf5 !important;
-}
-
-.chart-container{
-background:#fffaf5 !important;
-}
-
-
 </style></head><body><div class="layout"><aside class="sidebar"><div class="brand"><small>Smart Comfort Control</small><h2>Panou de control</h2></div><nav class="nav"><a href="index.html"><span class="ico">⌂</span>Dashboard</a><a href="sensors.html"><span class="ico">◎</span>Stare senzori</a><a href="fuzzy.html"><span class="ico">⌘</span>Reglare ventilație</a><a href="pid.html"><span class="ico">♫</span>Reglare audio</a><a href="control.html" class="active"><span class="ico">⚙</span>Control sistem</a><a href="history.html"><span class="ico">☷</span>Istoric valori</a></nav><div class="system-card"><b><span class="dot"></span>Sistem activ</b><p>Ultima actualizare<br><span id="sideUpdate">--</span></p></div></aside><main class="main">
 <div class="header"><div class="title"><h1>Control sistem</h1><p>Setări pentru modul manual și sincronizarea comenzilor cu dispozitivul.</p></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
 <section class="grid2"><div class="panel"><h3>Mod sistem</h3><p>Alege modul de funcționare.</p><div class="actions"><button class="btn" id="autoBtn">AUTO</button><button class="btn" id="manualBtn">MANUAL</button></div><p id="modeInfo" style="margin-top:16px"></p></div><div class="panel"><h3>Control muzică</h3><p>Setează volumul manual.</p><input class="slider" type="range" min="0" max="30" value="10" id="volumeSlider"><div class="metric green" style="margin-top:16px"><div class="metric-icon">♩</div><div><div class="label">Volum selectat</div><div class="val"><span id="volumeValue">10</span>/30</div></div></div></div><div class="panel"><h3>Control ventilator</h3><p>Alege treapta manuală a ventilatorului.</p><div class="actions" id="fanButtons"><button class="btn green" data-fan="0">0%</button><button class="btn green" data-fan="20">20%</button><button class="btn green" data-fan="40">40%</button><button class="btn green" data-fan="60">60%</button><button class="btn green" data-fan="80">80%</button><button class="btn green" data-fan="100">100%</button></div></div><div class="panel"><h3>Rezumat comenzi</h3><div class="mini-grid"><div class="mini"><div class="k">Mod</div><div class="v" id="currentMode">--</div></div><div class="mini"><div class="k">Volum</div><div class="v" id="currentVolume">--</div></div><div class="mini"><div class="k">Ventilator</div><div class="v" id="currentFan">--</div></div></div><button class="btn" id="saveBtn" style="margin-top:18px;width:100%">Salvează comanda</button><p id="saveMessage" style="margin-top:14px"></p></div></section>

@@ -236,30 +236,6 @@ margin-top:30px!important;
 }
 }
 
-
-.system-card b,.status-active{color:#2563eb !important;}
-.dot{background:#2563eb !important;box-shadow:0 0 10px rgba(37,99,235,.5)!important;}
-
-.alert-popup,.alert-box,.alert-modal,.alert{
-background:#fff4f4 !important;
-color:#7f1d1d !important;
-border:1px solid #ef4444 !important;
-}
-
-.alert-popup button,.alert-box button,.alert-modal button,.alert button{
-background:#ef4444 !important;
-color:#fff !important;
-}
-
-canvas{
-background:#fffaf5 !important;
-}
-
-.chart-container{
-background:#fffaf5 !important;
-}
-
-
 </style></head><body><div class="layout"><aside class="sidebar"><div class="brand"><small>Smart Comfort Control</small><h2>Panou de control</h2></div><nav class="nav"><a href="index.html"><span class="ico">⌂</span>Dashboard</a><a href="sensors.html"><span class="ico">◎</span>Stare senzori</a><a href="fuzzy.html"><span class="ico">⌘</span>Reglare ventilație</a><a href="pid.html"><span class="ico">♫</span>Reglare audio</a><a href="control.html"><span class="ico">⚙</span>Control sistem</a><a href="history.html" class="active"><span class="ico">☷</span>Istoric valori</a></nav><div class="system-card"><b><span class="dot"></span>Sistem activ</b><p>Ultima actualizare<br><span id="sideUpdate">--</span></p></div></aside><main class="main">
 <div class="header"><div class="title"><h1>Istoric valori</h1><p>Înregistrări recente salvate în baza de date.</p></div><div class="badge"><div class="clock">◷</div><div><span>Ultima actualizare</span><strong id="lastUpdate">--</strong></div></div></div>
 <section class="panel"><h3>Tabel istoric</h3><p>Ultimele valori primite de la ESP32 și salvate pe server.</p><table class="table"><thead><tr><th>Ora</th><th>Temp</th><th>Umid.</th><th>MQ135</th><th>Zgomot (dB)</th><th>Kalman (dB)</th><th>Eroare PID (dB)</th><th>Volum</th><th>Fuzzy</th><th>Vent.</th><th>Mod</th></tr></thead><tbody id="historyBody"></tbody></table></section>
